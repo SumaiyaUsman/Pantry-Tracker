@@ -69,7 +69,7 @@ export default function Home() {
         },
         {
           headers: {
-            'Authorization': `Bearer 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`,
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
             'Content-Type': 'application/json',
           },
         }
