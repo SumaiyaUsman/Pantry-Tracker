@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { firestore } from "@/firebase";
-import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Modal, Stack, TextField, Typography, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import { collection, deleteDoc, doc, query, setDoc, getDocs, getDoc } from "firebase/firestore";
 
 export default function Home() {
@@ -10,6 +10,7 @@ export default function Home() {
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState("name-asc");
 
   const updateInventory = async () => {
     const snapshot = query(collection(firestore, "inventory"));
@@ -59,7 +60,26 @@ export default function Home() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const filteredInventory = inventory.filter(item => 
+  const handleSortChange = (event) => {
+    setSortOption(event.target.value);
+  };
+
+  const sortedInventory = [...inventory].sort((a, b) => {
+    switch (sortOption) {
+      case "name-asc":
+        return a.name.localeCompare(b.name);
+      case "name-desc":
+        return b.name.localeCompare(a.name);
+      case "quantity-asc":
+        return a.quantity - b.quantity;
+      case "quantity-desc":
+        return b.quantity - a.quantity;
+      default:
+        return 0;
+    }
+  });
+
+  const filteredInventory = sortedInventory.filter(item =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -126,16 +146,31 @@ export default function Home() {
           </Stack>
         </Box>
       </Modal>
-      <Button variant="contained" onClick={handleOpen}>
+      <Button variant="contained" onClick={handleOpen} sx={{ mb: 2 }}>
         Add New Item
       </Button>
-      <TextField
-        variant="outlined"
-        placeholder="Search items..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        sx={{ marginBottom: 2, width: "800px" }}
-      />
+      <Stack direction="row" spacing={2} mb={2} alignItems="center" width="800px">
+        <TextField
+          variant="outlined"
+          placeholder="Search items..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{ flexGrow: 1 }}
+        />
+        <FormControl variant="outlined" sx={{ width: "200px" }}>
+          <InputLabel>Sort By</InputLabel>
+          <Select
+            value={sortOption}
+            onChange={handleSortChange}
+            label="Sort By"
+          >
+            <MenuItem value="name-asc">Name (A-Z)</MenuItem>
+            <MenuItem value="name-desc">Name (Z-A)</MenuItem>
+            <MenuItem value="quantity-asc">Quantity (Low to High)</MenuItem>
+            <MenuItem value="quantity-desc">Quantity (High to Low)</MenuItem>
+          </Select>
+        </FormControl>
+      </Stack>
       <Box border="1px solid #333">
         <Stack width="800px" height="300px" spacing={2} overflow="auto">
           {filteredInventory.map(({ name, quantity }) => (
