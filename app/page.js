@@ -54,36 +54,6 @@ export default function Home() {
     await updateInventory();
   };
 
-  const getRecipeSuggestions = async () => {
-    const itemNames = inventory.map(item => item.name).join(", ");
-    const prompt = `Suggest a recipe based on the following pantry items: ${itemNames}`;
-    
-    console.log("Fetching recipes with prompt:", prompt); // Debugging
-
-    try {
-      const response = await axios.post(
-        'https://api.openai.com/v1/engines/llama-3.1-8b-instant/completions',
-        {
-          prompt: prompt,
-          max_tokens: 150,
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      console.log("API response:", response.data); // Debugging
-
-      setRecipes(response.data.choices[0].text.trim().split('\n'));
-      setRecipeModalOpen(true); // Open the recipe modal when suggestions are available
-    } catch (error) {
-      console.error("Error fetching recipe suggestions:", error);
-    }
-  };
-
   useEffect(() => {
     updateInventory();
   }, []);
@@ -169,9 +139,6 @@ export default function Home() {
         onChange={(e) => setSearchTerm(e.target.value)}
         sx={{ marginBottom: 2, width: "800px" }}
       />
-      <Button variant="contained" onClick={getRecipeSuggestions}>
-        Get Recipe Suggestions
-      </Button>
       <Box border="1px solid #333">
         <Stack width="800px" height="300px" spacing={2} overflow="auto">
           {filteredInventory.map(({ name, quantity }) => (
