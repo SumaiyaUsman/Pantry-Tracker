@@ -1,17 +1,15 @@
 "use client"
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { firestore } from "@/firebase";
 import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
 import { collection, deleteDoc, doc, query, setDoc, getDocs, getDoc } from "firebase/firestore";
-import axios from "axios";
 
 export default function Home() {
   const [inventory, setInventory] = useState([]);
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [recipes, setRecipes] = useState([]);
-  const [recipeModalOpen, setRecipeModalOpen] = useState(false);
 
   const updateInventory = async () => {
     const snapshot = query(collection(firestore, "inventory"));
@@ -60,7 +58,6 @@ export default function Home() {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const handleRecipeModalClose = () => setRecipeModalOpen(false);
 
   const filteredInventory = inventory.filter(item => 
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -170,38 +167,6 @@ export default function Home() {
           ))}
         </Stack>
       </Box>
-      <Modal open={recipeModalOpen} onClose={handleRecipeModalClose}>
-        <Box 
-          position="absolute" 
-          top="50%" 
-          left="50%" 
-          width={600}
-          bgcolor="white"
-          border="2px solid #000"
-          boxShadow={24}
-          p={4}
-          display="flex"
-          flexDirection="column"
-          gap={3}
-          sx={{
-            transform: "translate(-50%,-50%)",
-          }}
-        >
-          <Typography variant="h4" color="#333" mb={2}>
-            Recipe Suggestions
-          </Typography>
-          <Stack spacing={1}>
-            {recipes.map((recipe, index) => (
-              <Typography key={index} variant="body1" color="#333">
-                {recipe}
-              </Typography>
-            ))}
-          </Stack>
-          <Button variant="contained" onClick={handleRecipeModalClose}>
-            Close
-          </Button>
-        </Box>
-      </Modal>
     </Box>
   );
 }
